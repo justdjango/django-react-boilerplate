@@ -17,7 +17,7 @@ npm i
 npm start
 ```
 
-## For deploying to Heroku
+## For deploying
 
 ```json
 npm run build
