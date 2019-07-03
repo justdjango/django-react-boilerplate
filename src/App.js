@@ -2,9 +2,8 @@ import React, { Component } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { connect } from "react-redux";
 import BaseRouter from "./routes";
-import "antd/dist/antd.css";
 import * as actions from "./store/actions/auth";
-
+import "semantic-ui-css/semantic.min.css";
 import CustomLayout from "./containers/Layout";
 
 class App extends Component {

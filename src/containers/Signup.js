@@ -1,166 +1,131 @@
 import React from "react";
-import { Form, Input, Icon, Button } from "antd";
+import {
+  Button,
+  Form,
+  Grid,
+  Header,
+  Message,
+  Segment
+} from "semantic-ui-react";
 import { connect } from "react-redux";
-import { NavLink } from "react-router-dom";
-import * as actions from "../store/actions/auth";
-
-const FormItem = Form.Item;
+import { NavLink, Redirect } from "react-router-dom";
+import { authSignup } from "../store/actions/auth";
 
 class RegistrationForm extends React.Component {
   state = {
-    confirmDirty: false
+    username: "",
+    email: "",
+    password1: "",
+    password2: ""
   };
 
   handleSubmit = e => {
     e.preventDefault();
-    this.props.form.validateFieldsAndScroll((err, values) => {
-      if (!err) {
-        this.props.onAuth(
-          values.userName,
-          values.email,
-          values.password,
-          values.confirm
-        );
-        this.props.history.push("/");
-      }
-    });
+    const { username, email, password1, password2 } = this.state;
+    this.props.signup(username, email, password1, password2);
   };
 
-  handleConfirmBlur = e => {
-    const value = e.target.value;
-    this.setState({ confirmDirty: this.state.confirmDirty || !!value });
-  };
-
-  compareToFirstPassword = (rule, value, callback) => {
-    const form = this.props.form;
-    if (value && value !== form.getFieldValue("password")) {
-      callback("Two passwords that you enter is inconsistent!");
-    } else {
-      callback();
-    }
-  };
-
-  validateToNextPassword = (rule, value, callback) => {
-    const form = this.props.form;
-    if (value && this.state.confirmDirty) {
-      form.validateFields(["confirm"], { force: true });
-    }
-    callback();
+  handleChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
   };
 
   render() {
-    const { getFieldDecorator } = this.props.form;
-
+    const { username, email, password1, password2 } = this.state;
+    const { error, loading, token } = this.props;
+    if (token) {
+      return <Redirect to="/" />;
+    }
     return (
-      <Form onSubmit={this.handleSubmit}>
-        <FormItem>
-          {getFieldDecorator("userName", {
-            rules: [{ required: true, message: "Please input your username!" }]
-          })(
-            <Input
-              prefix={<Icon type="user" style={{ color: "rgba(0,0,0,.25)" }} />}
-              placeholder="Username"
-            />
-          )}
-        </FormItem>
+      <Grid
+        textAlign="center"
+        style={{ height: "100vh" }}
+        verticalAlign="middle"
+      >
+        <Grid.Column style={{ maxWidth: 450 }}>
+          <Header as="h2" color="teal" textAlign="center">
+            Signup to your account
+          </Header>
+          {error && <p>{this.props.error.message}</p>}
 
-        <FormItem>
-          {getFieldDecorator("email", {
-            rules: [
-              {
-                type: "email",
-                message: "The input is not valid E-mail!"
-              },
-              {
-                required: true,
-                message: "Please input your E-mail!"
-              }
-            ]
-          })(
-            <Input
-              prefix={<Icon type="mail" style={{ color: "rgba(0,0,0,.25)" }} />}
-              placeholder="Email"
-            />
-          )}
-        </FormItem>
+          <React.Fragment>
+            <Form size="large" onSubmit={this.handleSubmit}>
+              <Segment stacked>
+                <Form.Input
+                  onChange={this.handleChange}
+                  value={username}
+                  name="username"
+                  fluid
+                  icon="user"
+                  iconPosition="left"
+                  placeholder="Username"
+                />
+                <Form.Input
+                  onChange={this.handleChange}
+                  value={email}
+                  name="email"
+                  fluid
+                  icon="mail"
+                  iconPosition="left"
+                  placeholder="E-mail address"
+                />
+                <Form.Input
+                  onChange={this.handleChange}
+                  fluid
+                  value={password1}
+                  name="password1"
+                  icon="lock"
+                  iconPosition="left"
+                  placeholder="Password"
+                  type="password"
+                />
+                <Form.Input
+                  onChange={this.handleChange}
+                  fluid
+                  value={password2}
+                  name="password2"
+                  icon="lock"
+                  iconPosition="left"
+                  placeholder="Confirm password"
+                  type="password"
+                />
 
-        <FormItem>
-          {getFieldDecorator("password", {
-            rules: [
-              {
-                required: true,
-                message: "Please input your password!"
-              },
-              {
-                validator: this.validateToNextPassword
-              }
-            ]
-          })(
-            <Input
-              prefix={<Icon type="lock" style={{ color: "rgba(0,0,0,.25)" }} />}
-              type="password"
-              placeholder="Password"
-            />
-          )}
-        </FormItem>
-
-        <FormItem>
-          {getFieldDecorator("confirm", {
-            rules: [
-              {
-                required: true,
-                message: "Please confirm your password!"
-              },
-              {
-                validator: this.compareToFirstPassword
-              }
-            ]
-          })(
-            <Input
-              prefix={<Icon type="lock" style={{ color: "rgba(0,0,0,.25)" }} />}
-              type="password"
-              placeholder="Password"
-              onBlur={this.handleConfirmBlur}
-            />
-          )}
-        </FormItem>
-
-        <FormItem>
-          <Button
-            type="primary"
-            htmlType="submit"
-            style={{ marginRight: "10px" }}
-          >
-            Signup
-          </Button>
-          Or
-          <NavLink style={{ marginRight: "10px" }} to="/login/">
-            {" "}
-            login
-          </NavLink>
-        </FormItem>
-      </Form>
+                <Button
+                  color="teal"
+                  fluid
+                  size="large"
+                  loading={loading}
+                  disabled={loading}
+                >
+                  Signup
+                </Button>
+              </Segment>
+            </Form>
+            <Message>
+              Already have an account? <NavLink to="/login">Login</NavLink>
+            </Message>
+          </React.Fragment>
+        </Grid.Column>
+      </Grid>
     );
   }
 }
 
-const WrappedRegistrationForm = Form.create()(RegistrationForm);
-
 const mapStateToProps = state => {
   return {
     loading: state.auth.loading,
-    error: state.auth.error
+    error: state.auth.error,
+    token: state.auth.token
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAuth: (username, email, password1, password2) =>
-      dispatch(actions.authSignup(username, email, password1, password2))
+    signup: (username, email, password1, password2) =>
+      dispatch(authSignup(username, email, password1, password2))
   };
 };
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(WrappedRegistrationForm);
+)(RegistrationForm);
