@@ -3,7 +3,7 @@ autopep8==1.4.4
 certifi==2019.6.16
 chardet==3.0.4
 defusedxml==0.6.0
-Django==2.2.3
+Django==2.2.8
 django-allauth==0.39.1
 django-cors-headers==3.0.2
 django-rest-auth==0.9.5
